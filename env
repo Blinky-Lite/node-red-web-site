@@ -1,0 +1,9 @@
+BOX=blinky-lite-v4
+MONGODBIP=mongodb+srv://zzzz:bbbb@cluster0.aaaa.mongodb.net/blinky-lite?retryWrites=true&w=majority
+MQTTCLIENTID=blinky-lite-v4-trays-sandbox
+MQTTSERVERIP=xxxx
+MQTTUSERNAME=yyyy
+MQTTPASSWORD=zzzz
+EXCHANGERATEURL=https:dfgsd
+ENTSOE=yyy
+NODEREDCONFIGSECRET=aaaa
