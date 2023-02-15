@@ -86,9 +86,7 @@
             "a2d4d8d23e0fb663"
         ],
         "x": 54,
-        "y": 39,
-        "w": 232,
-        "h": 82
+        "y": 39
     },
     {
         "id": "2e36a704e5b34131",
@@ -105,9 +103,7 @@
             "21dc7d3495acccbd"
         ],
         "x": 774,
-        "y": 139,
-        "w": 212,
-        "h": 82
+        "y": 139
     },
     {
         "id": "6b1d72a065437914",
@@ -124,9 +120,7 @@
             "a2d983d5ac16f767"
         ],
         "x": 754,
-        "y": 459,
-        "w": 232,
-        "h": 82
+        "y": 459
     },
     {
         "id": "6be74e15039dce40",
@@ -143,9 +137,7 @@
             "6dae18247871f69e"
         ],
         "x": 274,
-        "y": 359,
-        "w": 272,
-        "h": 82
+        "y": 359
     },
     {
         "id": "932976b1fa8413e3",
@@ -161,9 +153,7 @@
             "dcc23eb60bfbcc66"
         ],
         "x": 274,
-        "y": 459,
-        "w": 292,
-        "h": 82
+        "y": 459
     },
     {
         "id": "cbfba956c59a29f1",
@@ -180,7 +170,9 @@
             "d1b4e4f77e6221a3"
         ],
         "x": 54,
-        "y": 39
+        "y": 39,
+        "w": 232,
+        "h": 82
     },
     {
         "id": "e6eae5c8a21d720d",
@@ -197,7 +189,9 @@
             "c3b1f5e107f72224"
         ],
         "x": 774,
-        "y": 139
+        "y": 139,
+        "w": 212,
+        "h": 82
     },
     {
         "id": "ef5cb8e350f51d8c",
@@ -214,7 +208,9 @@
             "7ff1e43e3c9dd7c7"
         ],
         "x": 754,
-        "y": 451.5
+        "y": 451.5,
+        "w": 232,
+        "h": 97
     },
     {
         "id": "40e56362c23599cc",
@@ -232,7 +228,9 @@
             "5e7d2de841bcb0c1"
         ],
         "x": 1034,
-        "y": 519
+        "y": 519,
+        "w": 172,
+        "h": 82
     },
     {
         "id": "b6c18360e72ab474",
@@ -624,9 +622,7 @@
             "06333b8523546246"
         ],
         "x": 54,
-        "y": 39,
-        "w": 232,
-        "h": 82
+        "y": 39
     },
     {
         "id": "6ad7c930.1a06b8",
@@ -6394,7 +6390,7 @@
         "type": "function",
         "z": "7d1a76edaab21298",
         "name": "Date Params",
-        "func": "let trays = flow.get('trays');\nlet queryArray = [];\nlet nowTime = new Date().getTime();\nlet urlStart = \"https://transparency.entsoe.eu/api?documentType=A44\";\nurlStart = urlStart + \"&securityToken=\" + flow.get(\"entsoeToken\");\nurlStart = urlStart + \"&periodStart=\" + getDateString(nowTime - 144000000);\nurlStart = urlStart + \"&periodEnd=\"   + getDateString(nowTime + 144000000);\nfor (let ii = 0; ii < trays.length; ++ii)\n{\n    let url = urlStart + \"&in_Domain=\" + trays[ii].eicAreaCode.value;\n    url = url + \"&out_Domain=\" + trays[ii].eicAreaCode.value;\n    queryArray.push({topic:trays[ii].name, url:url, tray:trays[ii]});\n}\nreturn {topic:\"query\", payload:queryArray};\nfunction getDateString(time)\n{\n    let dateObj = new Date(time);\n    let dateString = dateObj.getUTCFullYear().toString();\n    let month = dateObj.getUTCMonth() + 1;\n    if (month < 10) dateString = dateString + \"0\";\n    dateString = dateString + month.toString();\n    let date = dateObj.getUTCDate();\n    if (date < 10) dateString = dateString + \"0\";\n    dateString = dateString + date.toString();\n    let hours = dateObj.getUTCHours();\n    if (hours < 10) dateString = dateString + \"0\";\n    dateString = dateString + hours.toString();\n    dateString = dateString + \"00\";\n    return dateString;\n}\n",
+        "func": "let trays = flow.get('trays');\nlet queryArray = [];\nlet nowTime = new Date().getTime();\nlet urlStart = \"https://web-api.tp.entsoe.eu/api?documentType=A44\";\nurlStart = urlStart + \"&securityToken=\" + flow.get(\"entsoeToken\");\nurlStart = urlStart + \"&periodStart=\" + getDateString(nowTime - 144000000);\nurlStart = urlStart + \"&periodEnd=\"   + getDateString(nowTime + 144000000);\nfor (let ii = 0; ii < trays.length; ++ii)\n{\n    let url = urlStart + \"&in_Domain=\" + trays[ii].eicAreaCode.value;\n    url = url + \"&out_Domain=\" + trays[ii].eicAreaCode.value;\n    queryArray.push({topic:trays[ii].name, url:url, tray:trays[ii]});\n}\nreturn {topic:\"query\", payload:queryArray};\nfunction getDateString(time)\n{\n    let dateObj = new Date(time);\n    let dateString = dateObj.getUTCFullYear().toString();\n    let month = dateObj.getUTCMonth() + 1;\n    if (month < 10) dateString = dateString + \"0\";\n    dateString = dateString + month.toString();\n    let date = dateObj.getUTCDate();\n    if (date < 10) dateString = dateString + \"0\";\n    dateString = dateString + date.toString();\n    let hours = dateObj.getUTCHours();\n    if (hours < 10) dateString = dateString + \"0\";\n    dateString = dateString + hours.toString();\n    dateString = dateString + \"00\";\n    return dateString;\n}\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
