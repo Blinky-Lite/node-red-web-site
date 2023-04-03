@@ -76,7 +76,7 @@ module.exports = {
         type: "credentials",
         users: [{
             username: "admin",
-            password: "$2a$08$/Cw40nisoDxTJadQpMAgTOIT1p3zdrx9oEX182/wLb7HkvV.tICCC",
+            password: "$2a$12$.VFC8rcOkXcDTVP0bJwFwujNc6R1qACWZzDfSJalIObNeYFV1BRLi",
             permissions: "*"
         }]
     },
@@ -333,13 +333,20 @@ module.exports = {
          */
         //tours: false,
 
+        page: {
+            title: "Blinky-Lite Cloud Tray Tutorial"
+        },
+        header: {
+            title: "Blinky-Lite Cloud Tray Tutorial"
+        },
+
         palette: {
             /** The following property can be used to order the categories in the editor
              * palette. If a node's category is not in the list, the category will get
              * added to the end of the palette.
              * If not set, the following default order is used:
              */
-            //categories: ['subflows', 'common', 'function', 'network', 'sequence', 'parser', 'storage'],
+            //categories: ['common', 'function', 'network', 'sequence', 'parser', 'storage','subflows'],
         },
 
         projects: {

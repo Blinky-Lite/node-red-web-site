@@ -1,9 +1,7 @@
-BOX=blinky-lite-v4
+BOX=blinky-box-tutorial
 MONGODBIP=mongodb+srv://zzzz:bbbb@cluster0.aaaa.mongodb.net/blinky-lite?retryWrites=true&w=majority
-MQTTCLIENTID=blinky-lite-v4-trays-sandbox
+MQTTCLIENTID=blinky-cloud-trays-tutorial
 MQTTSERVERIP=xxxx
 MQTTUSERNAME=yyyy
 MQTTPASSWORD=zzzz
-EXCHANGERATEURL=https:dfgsd
-ENTSOE=yyy
 NODEREDCONFIGSECRET=aaaa
