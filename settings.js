@@ -334,10 +334,10 @@ module.exports = {
         //tours: false,
 
         page: {
-            title: "Blinky-Lite Cloud Tray Tutorial"
+            title: "blinky-mqtt-trays"
         },
         header: {
-            title: "Blinky-Lite Cloud Tray Tutorial"
+            title: "blinky-mqtt-trays"
         },
 
         palette: {
