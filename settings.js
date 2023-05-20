@@ -40,7 +40,7 @@ module.exports = {
      * node-red from being able to decrypt your existing credentials and they will be
      * lost.
      */
-    credentialSecret: process.env.NODEREDCONFIGSECRET,
+    credentialSecret: false,
 
     /** By default, the flow JSON will be formatted over multiple lines making
      * it easier to compare changes when using version control.
@@ -76,7 +76,7 @@ module.exports = {
         type: "credentials",
         users: [{
             username: "admin",
-            password: "$2a$12$.VFC8rcOkXcDTVP0bJwFwujNc6R1qACWZzDfSJalIObNeYFV1BRLi",
+            password: process.env.NODEREDPASSWORD,
             permissions: "*"
         }]
     },
@@ -139,7 +139,7 @@ module.exports = {
  ******************************************************************************/
 
     /** the tcp port that the Node-RED web server is listening on */
-    uiPort: process.env.PORT || 60428,
+    uiPort: process.env.NODEREDPORT,
 
     /** By default, the Node-RED UI accepts connections on all IPv4 interfaces.
      * To listen on all IPv6 addresses, set uiHost to "::",
@@ -334,10 +334,10 @@ module.exports = {
         //tours: false,
 
         page: {
-            title: "blinky-mqtt-trays"
+            title: process.env.NODEREDLABEL
         },
         header: {
-            title: "blinky-mqtt-trays"
+            title: process.env.NODEREDLABEL
         },
 
         palette: {

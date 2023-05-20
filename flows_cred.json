@@ -1,3 +1,6 @@
 {
-    "$": "abea4ad7051e433f51466411c5da15efumn3ShmJxvLvJZNG3UbYV1t1R0R/uHNrxrOWcAvhEex2cgkxDKenOeQnEYELmb+u2j/R04yvvwMa/twMx9nYwThYgxRFTKEhd8JB"
+    "84d80994.260508": {
+        "user": "$(MQTTUSERNAME)",
+        "password": "$(MQTTPASSWORD)"
+    }
 }

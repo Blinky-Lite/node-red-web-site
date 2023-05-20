@@ -1,7 +1,10 @@
-BOX=blinky-box-tutorial
-MONGODBIP=mongodb+srv://zzzz:bbbb@cluster0.aaaa.mongodb.net/blinky-lite?retryWrites=true&w=majority
-MQTTCLIENTID=blinky-cloud-trays-tutorial
+GIZMOMQTTSETTINGSUBSCRIBE=blinky-box-tutorial/gizmo/+/setting/#
+MQTTCLIENTID=gizmo-trays-01
 MQTTSERVERIP=xxxx
 MQTTUSERNAME=yyyy
 MQTTPASSWORD=zzzz
-NODEREDCONFIGSECRET=aaaa
+NODEREDLABEL=gizmo-trays
+NODEREDPASSWORD=$2a........................................................W
+ADMINNAME=ADMIN
+NODEREDPORT=60428
+
