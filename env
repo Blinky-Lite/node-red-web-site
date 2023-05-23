@@ -1,4 +1,4 @@
-GIZMOMQTTSETTINGSUBSCRIBE=blinky-box-tutorial/shellyplug-s/+/setting/#
+BOX=blinky-box-tutorial
 MQTTCLIENTID=blinky-shelly-trays-01
 MQTTSERVERIP=xxxx
 MQTTUSERNAME=yyyy
