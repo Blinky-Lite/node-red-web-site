@@ -1,5 +1,5 @@
 {
-  "name": "blinky-bus-mqtt-trays",
+  "name": "blinky-shelly-trays",
   "version": "1.0.0",
   "description": "",
   "main": "node_modules/node-red/red.js -s ./settings.js -u ./",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Blinky-Lite/blinky-bus-mqtt-trays.git"
+    "url": "https://github.com/Blinky-Lite/blinky-shelly-trays.git"
   },
   "keywords": [
     "node-red"

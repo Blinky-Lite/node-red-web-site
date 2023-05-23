@@ -1,9 +1,9 @@
-GIZMOMQTTSETTINGSUBSCRIBE=blinky-box-tutorial/gizmo/+/setting/#
-MQTTCLIENTID=gizmo-trays-01
+GIZMOMQTTSETTINGSUBSCRIBE=blinky-box-tutorial/shellyplug-s/+/setting/#
+MQTTCLIENTID=blinky-shelly-trays-01
 MQTTSERVERIP=xxxx
 MQTTUSERNAME=yyyy
 MQTTPASSWORD=zzzz
-NODEREDLABEL=gizmo-trays
+NODEREDLABEL=blinky-shelly-trays
 NODEREDPASSWORD=$2a........................................................W
 ADMINNAME=ADMIN
 NODEREDPORT=60428
