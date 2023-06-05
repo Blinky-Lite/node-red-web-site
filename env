@@ -4,7 +4,6 @@ MQTTSERVERIP=xxxx
 MQTTUSERNAME=yyyy
 MQTTPASSWORD=zzzz
 NODEREDLABEL=blinky-shelly-trays
-NODEREDPASSWORD=$2a........................................................W
 ADMINNAME=ADMIN
 NODEREDPORT=60428
 
