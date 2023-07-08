@@ -226,7 +226,7 @@
         "type": "function",
         "z": "35ebad916f0a27ed",
         "name": "Request tray from Database",
-        "func": "if (flow.get('trays').length > 0) return [null,null];\nlet trayProps  = flow.get('trayProps');\nnode.warn(\"Asking for \" + trayProps.type + \" trays from database\");\nvar newMsg =\n{\n    topic: trayProps.box + '/' + trayProps.type + '/' + 'ALL' + '/echo',\n    payload: JSON.stringify({ topic: trayProps.box + '/' + trayProps.type + '/' + 'ALL' + '/setting/echo' })\n};\nreturn [newMsg, { topic: \"getTrayProps\", payload: true }];  \n",
+        "func": "if (flow.get('trays').length > 0) return [null,null];\nlet trayProps  = flow.get('trayProps');\nnode.warn(\"Asking for \" + trayProps.type + \" trays from database\");\nvar newMsg =\n{\n    topic: trayProps.box + '/tray/' + trayProps.type + '/' + 'ALL' + '/echo',\n    payload: JSON.stringify({ topic: trayProps.box + '/tray/' + trayProps.type + '/' + 'ALL' + '/setting/echo' })\n};\nreturn [newMsg, { topic: \"getTrayProps\", payload: true }];  \n",
         "outputs": 2,
         "noerr": 0,
         "initialize": "",
@@ -290,7 +290,7 @@
         "links": [
             "2545c4a66f386231"
         ],
-        "x": 1025,
+        "x": 1035,
         "y": 160,
         "wires": []
     },
@@ -300,7 +300,8 @@
         "z": "35ebad916f0a27ed",
         "name": "request tray echo in",
         "links": [
-            "063def90cca3eae3"
+            "063def90cca3eae3",
+            "2314f9133f529006"
         ],
         "x": 1575,
         "y": 220,
@@ -408,7 +409,7 @@
         "type": "function",
         "z": "35ebad916f0a27ed",
         "name": "Filter MQTT",
-        "func": "let mqttTopic = msg.topic.split('/')\nlet trayName = mqttTopic[2];\nlet actionTopic = mqttTopic[4];\nif (trayName == env.get(\"ADMINNAME\"))\n{\n    if (actionTopic == 'setting') actionTopic = 'reloadTrays'\n    return {topic:actionTopic, payload:msg.payload};\n}\nif (actionTopic == 'echo')\n{\n    return {topic:'echo', payload:msg.payload};\n}\nlet trays = flow.get('trays');\nlet tray = null;\nfor (let ii = 0; ii < trays.length; ++ii)\n{\n    if (trays[ii].name == trayName)  tray = trays[ii];\n}\nif (tray ==  null) return null;\nreturn {topic:actionTopic, payload:msg.payload, tray:tray};\n",
+        "func": "let mqttTopic = msg.topic.split('/')\nlet trayName = mqttTopic[3];\nlet actionTopic = mqttTopic[5];\nif (trayName == env.get(\"ADMINNAME\"))\n{\n    if (actionTopic == 'setting') actionTopic = 'reloadTrays'\n    return {topic:actionTopic, payload:msg.payload};\n}\nif (actionTopic == 'echo')\n{\n    return {topic:'echo', payload:msg.payload};\n}\nlet trays = flow.get('trays');\nlet tray = null;\nfor (let ii = 0; ii < trays.length; ++ii)\n{\n    if (trays[ii].name == trayName)  tray = trays[ii];\n}\nif (tray ==  null) return null;\nreturn {topic:actionTopic, payload:msg.payload, tray:tray};\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -427,15 +428,19 @@
         "type": "function",
         "z": "35ebad916f0a27ed",
         "name": "Save Trays in flow",
-        "func": "let tray = msg.payload;\nif (tray.name == env.get(\"ADMINNAME\"))\n{\n    tray.reloadTrays.value = 0;\n    flow.set('adminTray', tray);\n    return null;\n}\ntray.watchdog.value = 0;\nflow.get('trays').push(tray);\nflow.get('archiveTimes').push(tray.timeStamp);\n//node.warn(flow.get('trays'));\nreturn null;\n",
-        "outputs": 0,
+        "func": "let tray = msg.payload;\nif (tray.name == env.get(\"ADMINNAME\"))\n{\n    tray.reloadTrays.value = 0;\n    flow.set('adminTray', tray);\n    return null;\n}\ntray.watchdog.value = 0;\ntray.trayControl.value = 0;\nlet index = -1;\nlet trays = flow.get('trays');\n\nfor (let itray in trays)\n{\n    if ((trays[itray].type == tray.type) && (trays[itray].name == tray.name))\n    {\n        index = Number(itray);\n    }\n}\nif (index < 0)\n{\n    trays.push(tray);\n    flow.get('archiveTimes').push(tray.timeStamp);\n}\nelse\n{\n    trays[index] = tray;\n}\n//node.warn(flow.get('trays'));\nreturn {topic:tray.name, payload:tray};\n",
+        "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
         "x": 880,
         "y": 520,
-        "wires": []
+        "wires": [
+            [
+                "938e10b962484b58"
+            ]
+        ]
     },
     {
         "id": "cffe9c2a52b1e43e",
@@ -468,7 +473,7 @@
         "type": "function",
         "z": "35ebad916f0a27ed",
         "name": "Create Readings",
-        "func": "let trayProps = flow.get('trayProps');\nlet topicSplit = msg.topic.split('/');\nif (topicSplit[1] != trayProps.type) return null;\nlet trayName = topicSplit[2];\nlet trays = flow.get('trays');\nlet tray = null;\nlet trayIndex = -1;\nfor (let ii = 0; ii < trays.length; ++ii)\n{\n    if (trays[ii].name == trayName)\n    {\n        tray = trays[ii];\n        trayIndex = ii;\n    }\n}\nif (tray ==  null) return null;\nlet newData = false;\ntray.timeStamp = new Date().getTime();\n\n// Start Custom \nif (topicSplit[3] == 'temperature')     tray.temperature.value     = Number(msg.payload);\nif (topicSplit[3] == 'overtemperature') tray.overtemperature.value = Number(msg.payload);\nif (topicSplit[3] == 'relay')\n{\n    if (topicSplit.length < 6)\n    {\n        if (msg.payload == \"off\") tray.relay.value = 0;\n        if (msg.payload == \"on\")  tray.relay.value = 1;\n        newData = true;\n    }\n    else\n    {\n        if (topicSplit[5] == 'power')  tray.power.value  = Number(msg.payload);\n        if (topicSplit[5] == 'energy')\n        {\n            tray.energy.value = Math.round(10 * Number(msg.payload) / 60) / 10;\n            tray.watchdog.value = tray.watchdog.value + 1;\n            if (tray.watchdog.value > 32760) tray.watchdog.value = 0;\n        }\n    }\n}\nif (!newData) return null;\n// End custom\n\nlet newMsg = {topic:trayName, payload:tray};\nlet archiveMsg = null;\nlet archiveTimes = flow.get('archiveTimes');\nif ((tray.timeStamp - archiveTimes[trayIndex]) > tray.arcPeriod)\n{\n    archiveTimes[trayIndex] = tray.timeStamp;\n    archiveMsg = newMsg;\n}\nreturn  [newMsg,archiveMsg];\n",
+        "func": "let trayProps = flow.get('trayProps');\nlet topicSplit = msg.topic.split('/');\nif (topicSplit[2] != trayProps.type) return null;\nlet trayName = topicSplit[3];\nlet trays = flow.get('trays');\nlet tray = null;\nlet trayIndex = -1;\nfor (let ii = 0; ii < trays.length; ++ii)\n{\n    if (trays[ii].name == trayName)\n    {\n        tray = trays[ii];\n        trayIndex = ii;\n    }\n}\nif (tray ==  null) return null;\nlet newData = false;\ntray.timeStamp = new Date().getTime();\n\n// Start Custom \nif (topicSplit[4] == 'temperature')     tray.temperature.value     = Number(msg.payload);\nif (topicSplit[4] == 'overtemperature') tray.overtemperature.value = Number(msg.payload);\nif (topicSplit[4] == 'relay')\n{\n    if (topicSplit.length < 7)\n    {\n        if (msg.payload == \"off\") tray.relay.value = 0;\n        if (msg.payload == \"on\")  tray.relay.value = 1;\n        newData = true;\n    }\n    else\n    {\n        if (topicSplit[6] == 'power')  tray.power.value  = Number(msg.payload);\n        if (topicSplit[6] == 'energy')\n        {\n            tray.energy.value = Math.round(10 * Number(msg.payload) / 60) / 10;\n            tray.watchdog.value = tray.watchdog.value + 1;\n            if (tray.watchdog.value > 32760) tray.watchdog.value = 0;\n        }\n    }\n}\nif (!newData) return null;\n// End custom\n\nlet newMsg = {topic:trayName, payload:tray};\nlet archiveMsg = null;\nlet archiveTimes = flow.get('archiveTimes');\nif ((tray.timeStamp - archiveTimes[trayIndex]) > tray.arcPeriod)\n{\n    archiveTimes[trayIndex] = tray.timeStamp;\n    archiveMsg = newMsg;\n}\nreturn  [newMsg,archiveMsg];\n",
         "outputs": 2,
         "noerr": 0,
         "initialize": "",
@@ -525,7 +530,7 @@
         "type": "function",
         "z": "35ebad916f0a27ed",
         "name": "Publish tray",
-        "func": "let tray = msg.payload;\nlet newMsg = \n{\n    topic: flow.get('trayProps').box + '/' + tray.type + '/' + tray.name + '/reading',\n    payload: JSON.stringify(tray)\n};\nreturn  newMsg;  \n",
+        "func": "let tray = msg.payload;\nlet newMsg = \n{\n    topic: flow.get('trayProps').box + '/tray/' + tray.type + '/' + tray.name + '/reading',\n    payload: JSON.stringify(tray)\n};\nreturn  newMsg;  \n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -563,7 +568,7 @@
         "type": "function",
         "z": "35ebad916f0a27ed",
         "name": "Archive tray",
-        "func": "let tray = msg.payload;\nlet newMsg = \n{\n    topic: flow.get('trayProps').box + '/' + tray.type + '/' + tray.name + '/archive',\n    payload: JSON.stringify(tray)\n};\nreturn  newMsg;  \n",
+        "func": "let tray = msg.payload;\nlet newMsg = \n{\n    topic: flow.get('trayProps').box + '/tray/' + tray.type + '/' + tray.name + '/archive',\n    payload: JSON.stringify(tray)\n};\nreturn  newMsg;  \n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -624,7 +629,7 @@
         "type": "function",
         "z": "35ebad916f0a27ed",
         "name": "Alarm Scan",
-        "func": "let tray = msg.payload;\nlet alarmFlagReading = scalarAlarmScan(tray, 'reading');\nlet alarmFlagSetting = scalarAlarmScan(tray, 'setting');\nreturn {topic: 'alarmScanCompleted', payload: tray};\n\nfunction getActionArray(tray, type, actionType)\n{\n    var actionArray = [];\n    var keys = Object.keys(tray);\n    for (var ii = 0; ii < keys.length; ++ii)\n    {\n        if (tray[keys[ii]].hasOwnProperty('type'))\n        {\n            if (tray[keys[ii]].type == type)\n            {\n                if (tray[keys[ii]].action == actionType)\n                {\n                    actionArray.push(tray[keys[ii]]);\n                }\n            }\n        }\n    }\n    return actionArray;\n}\nfunction scalarAlarmScan(tray, actionType)\n{\n    var alarmFlag = false;\n    var actionArray = getActionArray(tray, 'scalar', actionType);\n    if (actionArray.length > 0)\n    {\n        for (var ii = 0; ii < actionArray.length; ++ii)\n        {\n            let oldAlarmValue = actionArray[ii].alarm.value;\n            actionArray[ii].alarm.value = 0;\n            if (!isNaN(actionArray[ii].value))\n            {\n                if (actionArray[ii].value <= actionArray[ii].alarm.limits.low)  actionArray[ii].alarm.value = 1;\n                if (actionArray[ii].value <= actionArray[ii].alarm.limits.lolo) actionArray[ii].alarm.value = 3;\n                if (actionArray[ii].value >= actionArray[ii].alarm.limits.high) actionArray[ii].alarm.value = 2;\n                if (actionArray[ii].value >= actionArray[ii].alarm.limits.hihi) actionArray[ii].alarm.value = 4;\n                if (actionArray[ii].alarm.value != oldAlarmValue) alarmFlag = true;\n            }\n        }\n    }\n    return alarmFlag;\n}\n",
+        "func": "let tray = msg.payload;\nlet alarmFlagReading = scalarAlarmScan(tray, 'reading');\nlet alarmFlagSetting = scalarAlarmScan(tray, 'setting');\nlet newMsg = null;\nswitch( tray.trayControl.value)\n{\n    case 0:\n        newMsg = {topic: 'alarmScanCompleted', payload: tray};\n        break;\n    case -1:\n        tray.trayControl.value = 1;\n        newMsg = {topic: 'alarmScanCompleted', payload: tray};\n        break;\n    default:\n        break;\n}\nreturn newMsg;\n\nfunction getActionArray(tray, type, actionType)\n{\n    var actionArray = [];\n    var keys = Object.keys(tray);\n    for (var ii = 0; ii < keys.length; ++ii)\n    {\n        if (tray[keys[ii]].hasOwnProperty('type'))\n        {\n            if (tray[keys[ii]].type == type)\n            {\n                if (tray[keys[ii]].action == actionType)\n                {\n                    actionArray.push(tray[keys[ii]]);\n                }\n            }\n        }\n    }\n    return actionArray;\n}\nfunction scalarAlarmScan(tray, actionType)\n{\n    var alarmFlag = false;\n    var actionArray = getActionArray(tray, 'scalar', actionType);\n    if (actionArray.length > 0)\n    {\n        for (var ii = 0; ii < actionArray.length; ++ii)\n        {\n            let oldAlarmValue = actionArray[ii].alarm.value;\n            actionArray[ii].alarm.value = 0;\n            if (!isNaN(actionArray[ii].value))\n            {\n                if (actionArray[ii].value <= actionArray[ii].alarm.limits.low)  actionArray[ii].alarm.value = 1;\n                if (actionArray[ii].value <= actionArray[ii].alarm.limits.lolo) actionArray[ii].alarm.value = 3;\n                if (actionArray[ii].value >= actionArray[ii].alarm.limits.high) actionArray[ii].alarm.value = 2;\n                if (actionArray[ii].value >= actionArray[ii].alarm.limits.hihi) actionArray[ii].alarm.value = 4;\n                if (actionArray[ii].alarm.value != oldAlarmValue) alarmFlag = true;\n            }\n        }\n    }\n    return alarmFlag;\n}\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "// Code added here will be run once\n// whenever the node is started.\ncontext.set('lastAlarm', -1);",
@@ -686,7 +691,7 @@
             "ce5672e1f22d7692"
         ],
         "x": 1025,
-        "y": 340,
+        "y": 320,
         "wires": []
     },
     {
@@ -707,8 +712,8 @@
         "type": "function",
         "z": "35ebad916f0a27ed",
         "name": "Create Setting",
-        "func": "let tray = msg.tray;\n// Start Custom\nlet publishTopic = \"shellies\" + \"/\" + tray.type + \"/\" + tray.name + \"/relay/0/command\";\n// End Custom\nlet blinkyBusSettingMsg = \n{\n    topic : publishTopic, \n    payload : {} \n}\nlet blinkyBusMessage = false;\nswitch(msg.payload.cube)\n{\n// Start Custom\n    case 'setRelay':\n        if (msg.payload.value == 0)  blinkyBusSettingMsg.payload = \"off\"\n        if (msg.payload.value == 1)  blinkyBusSettingMsg.payload = \"on\"\n        tray[msg.payload.cube].value = msg.payload.value;\n        blinkyBusMessage = true;\n        break;\n    case 'opState':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n   case 'startScheduleTime':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'stopScheduleTime':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'maxRate':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'alias':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'priceArea':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'timeZone':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n     default:\n        break;\n// End Custom\n}\nlet msgArray = [null,null];\nif (blinkyBusMessage)\n{\n    msgArray = [blinkyBusSettingMsg, {topic:'settingDone', payload:tray}];\n    \n}\nelse\n{\n    msgArray = [null,{topic:'settingDone', payload:tray}];\n}\nreturn msgArray;",
-        "outputs": 2,
+        "func": "let tray = msg.tray;\n// Start Custom\nlet publishTopic = env.get(\"SHELLYMQTTLEAD\") + '/' + tray.type + \"/\" + tray.name + \"/relay/0/command\";\n// End Custom\nlet blinkyBusSettingMsg = \n{\n    topic : publishTopic, \n    payload : {} \n}\nlet blinkyBusMessage = false;\nlet trayControlMessage = null;\nlet trayProps  = flow.get('trayProps');\nswitch(msg.payload.cube)\n{\n// Start Custom\n    case 'setRelay':\n        if (msg.payload.value == 0)  blinkyBusSettingMsg.payload = \"off\"\n        if (msg.payload.value == 1)  blinkyBusSettingMsg.payload = \"on\"\n        tray[msg.payload.cube].value = msg.payload.value;\n        blinkyBusMessage = true;\n        break;\n    case 'opState':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n   case 'startScheduleTime':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'stopScheduleTime':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'maxRate':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'alias':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'priceArea':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'timeZone':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'trayControl':\n        switch(msg.payload.value)\n        {\n            case 0:\n                tray.trayControl.value = 0;\n                break;\n            case 1:\n                tray.trayControl.value = -1;\n                break;\n            case 2:\n                if (tray.trayControl.value > 0)\n                {\n                    tray.trayControl.value = 2;\n                    trayControlMessage =\n                    {\n                        topic: trayProps.box + '/tray/' + tray.type + '/' + tray.name + '/echo',\n                        payload: JSON.stringify({ topic: trayProps.box + '/tray/' + tray.type + '/' + tray.name + '/setting/echo' })\n                    };\n                }\n                break;\n            default:\n                tray.trayControl.value = 0;\n                break;\n        }\n    break;\n    default:\n        break;\n// End Custom\n}\nlet msgArray = [null,null];\nif (blinkyBusMessage)\n{\n    msgArray = [blinkyBusSettingMsg, {topic:'settingDone', payload:tray},null];\n    \n}\nelse\n{\n    msgArray = [null,{topic:'settingDone', payload:tray},trayControlMessage];\n}\nreturn msgArray;",
+        "outputs": 3,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
@@ -721,6 +726,9 @@
             ],
             [
                 "db68a00ed2d7ce63"
+            ],
+            [
+                "2314f9133f529006"
             ]
         ]
     },
@@ -841,7 +849,7 @@
         "type": "function",
         "z": "35ebad916f0a27ed",
         "name": "Gizmo MQTT Reading topic",
-        "func": "let trayProps = flow.get('trayProps');\nlet subscribeTopic = \"shellies/\" + trayProps.type + \"/+/#\";  //Custom\nreturn {action:\"subscribe\",topic:subscribeTopic};",
+        "func": "let trayProps = flow.get('trayProps');\nlet subscribeTopic = env.get(\"SHELLYMQTTLEAD\") + '/' + trayProps.type + \"/+/#\";  //Custom\nreturn {action:\"subscribe\",topic:subscribeTopic};",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -998,7 +1006,7 @@
         "type": "function",
         "z": "35ebad916f0a27ed",
         "name": "Blinky MQTT Reading topic",
-        "func": "let trayProps = flow.get('trayProps');\nlet subscribeTopic = trayProps.box + \"/\" + trayProps.type + \"/+/setting/#\";  //Custom\nreturn {action:\"subscribe\",topic:subscribeTopic};",
+        "func": "let trayProps = flow.get('trayProps');\nlet subscribeTopic = trayProps.box + \"/tray/\" + trayProps.type + \"/+/setting/#\";  //Custom\nreturn {action:\"subscribe\",topic:subscribeTopic};",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1027,6 +1035,19 @@
                 "4c356a7e3529bf1c"
             ]
         ]
+    },
+    {
+        "id": "2314f9133f529006",
+        "type": "link out",
+        "z": "35ebad916f0a27ed",
+        "name": "reload tray out",
+        "mode": "link",
+        "links": [
+            "f882c2407b2620be"
+        ],
+        "x": 1025,
+        "y": 360,
+        "wires": []
     },
     {
         "id": "06c82aa63edeaff1",
@@ -1098,7 +1119,7 @@
         "type": "function",
         "z": "d2a24d5ab7c967e5",
         "name": "Request tray from Database",
-        "func": "if (flow.get('trays').length > 0) return [null,null];\nlet trayProps  = flow.get('trayProps');\nnode.warn(\"Asking for \" + trayProps.type + \" trays from database\");\nvar newMsg =\n{\n    topic: trayProps.box + '/' + trayProps.type + '/' + 'ALL' + '/echo',\n    payload: JSON.stringify({ topic: trayProps.box + '/' + trayProps.type + '/' + 'ALL' + '/setting/echo' })\n};\nreturn [newMsg, { topic: \"getTrayProps\", payload: true }];  \n",
+        "func": "if (flow.get('trays').length > 0) return [null,null];\nlet trayProps  = flow.get('trayProps');\nnode.warn(\"Asking for \" + trayProps.type + \" trays from database\");\nvar newMsg =\n{\n    topic: trayProps.box + '/tray/' + trayProps.type + '/' + 'ALL' + '/echo',\n    payload: JSON.stringify({ topic: trayProps.box + '/tray/' + trayProps.type + '/' + 'ALL' + '/setting/echo' })\n};\nreturn [newMsg, { topic: \"getTrayProps\", payload: true }];  \n",
         "outputs": 2,
         "noerr": 0,
         "initialize": "",
@@ -1172,7 +1193,8 @@
         "z": "d2a24d5ab7c967e5",
         "name": "request tray echo in",
         "links": [
-            "0877dd2a5de50711"
+            "0877dd2a5de50711",
+            "55b54f13100eb833"
         ],
         "x": 1575,
         "y": 220,
@@ -1280,7 +1302,7 @@
         "type": "function",
         "z": "d2a24d5ab7c967e5",
         "name": "Filter MQTT",
-        "func": "let mqttTopic = msg.topic.split('/')\nlet trayName = mqttTopic[2];\nlet actionTopic = mqttTopic[4];\nif (trayName == env.get(\"ADMINNAME\"))\n{\n    if (actionTopic == 'setting') actionTopic = 'reloadTrays'\n    return {topic:actionTopic, payload:msg.payload};\n}\nif (actionTopic == 'echo')\n{\n    return {topic:'echo', payload:msg.payload};\n}\nlet trays = flow.get('trays');\nlet tray = null;\nfor (let ii = 0; ii < trays.length; ++ii)\n{\n    if (trays[ii].name == trayName)  tray = trays[ii];\n}\nif (tray ==  null) return null;\nreturn {topic:actionTopic, payload:msg.payload, tray:tray};\n",
+        "func": "let mqttTopic = msg.topic.split('/')\nlet trayName = mqttTopic[3];\nlet actionTopic = mqttTopic[5];\nif (trayName == env.get(\"ADMINNAME\"))\n{\n    if (actionTopic == 'setting') actionTopic = 'reloadTrays'\n    return {topic:actionTopic, payload:msg.payload};\n}\nif (actionTopic == 'echo')\n{\n    return {topic:'echo', payload:msg.payload};\n}\nlet trays = flow.get('trays');\nlet tray = null;\nfor (let ii = 0; ii < trays.length; ++ii)\n{\n    if (trays[ii].name == trayName)  tray = trays[ii];\n}\nif (tray ==  null) return null;\nreturn {topic:actionTopic, payload:msg.payload, tray:tray};\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1299,15 +1321,19 @@
         "type": "function",
         "z": "d2a24d5ab7c967e5",
         "name": "Save Trays in flow",
-        "func": "let tray = msg.payload;\nif (tray.name == env.get(\"ADMINNAME\"))\n{\n    tray.reloadTrays.value = 0;\n    flow.set('adminTray', tray);\n    return null;\n}\ntray.watchdog.value = 0;\nflow.get('trays').push(tray);\nflow.get('archiveTimes').push(tray.timeStamp);\n//node.warn(flow.get('trays'));\nreturn null;\n",
-        "outputs": 0,
+        "func": "let tray = msg.payload;\nif (tray.name == env.get(\"ADMINNAME\"))\n{\n    tray.reloadTrays.value = 0;\n    flow.set('adminTray', tray);\n    return null;\n}\ntray.watchdog.value = 0;\ntray.trayControl.value = 0;\nlet index = -1;\nlet trays = flow.get('trays');\n\nfor (let itray in trays)\n{\n    if ((trays[itray].type == tray.type) && (trays[itray].name == tray.name))\n    {\n        index = Number(itray);\n    }\n}\nif (index < 0)\n{\n    trays.push(tray);\n    flow.get('archiveTimes').push(tray.timeStamp);\n}\nelse\n{\n    trays[index] = tray;\n}\n//node.warn(flow.get('trays'));\nreturn {topic:tray.name, payload:tray};\n",
+        "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 880,
-        "y": 520,
-        "wires": []
+        "x": 890,
+        "y": 540,
+        "wires": [
+            [
+                "14a91c438626c08e"
+            ]
+        ]
     },
     {
         "id": "194cbbcc88d7d6e7",
@@ -1340,7 +1366,7 @@
         "type": "function",
         "z": "d2a24d5ab7c967e5",
         "name": "Create Readings",
-        "func": "let trayProps = flow.get('trayProps');\nlet topicSplit = msg.topic.split('/');\nif (topicSplit[1] != trayProps.type) return null;\nlet trayName = topicSplit[2];\nlet trays = flow.get('trays');\nlet tray = null;\nlet trayIndex = -1;\nfor (let ii = 0; ii < trays.length; ++ii)\n{\n    if (trays[ii].name == trayName)\n    {\n        tray = trays[ii];\n        trayIndex = ii;\n    }\n}\nif (tray ==  null) return null;\nlet newData = false;\ntray.timeStamp = new Date().getTime();\n\n// Start Custom \nif (topicSplit[4] == 'temperature')     tray.temperature.value = msg.payload;\nif (topicSplit[4] == 'humidity') tray.humidity.value = msg.payload;\nif (topicSplit[4] == 'battery') \n{\n    tray.battery.value = msg.payload;\n    tray.watchdog.value = tray.watchdog.value + 1;\n    if (tray.watchdog.value > 32760) tray.watchdog.value = 0;\n// last message in burst\n    newData = true;\n}\nif (!newData) return null;\n// End custom\n\nlet newMsg = {topic:trayName, payload:tray};\nreturn  [newMsg,newMsg];\n",
+        "func": "let trayProps = flow.get('trayProps');\nlet topicSplit = msg.topic.split('/');\nif (topicSplit[2] != trayProps.type) return null;\nlet trayName = topicSplit[3];\nlet trays = flow.get('trays');\nlet tray = null;\nlet trayIndex = -1;\nfor (let ii = 0; ii < trays.length; ++ii)\n{\n    if (trays[ii].name == trayName)\n    {\n        tray = trays[ii];\n        trayIndex = ii;\n    }\n}\nif (tray ==  null) return null;\nlet newData = false;\ntray.timeStamp = new Date().getTime();\n\n// Start Custom \nif (topicSplit[5] == 'temperature')     tray.temperature.value = msg.payload;\nif (topicSplit[5] == 'humidity') tray.humidity.value = msg.payload;\nif (topicSplit[5] == 'battery') \n{\n    tray.battery.value = msg.payload;\n    tray.watchdog.value = tray.watchdog.value + 1;\n    if (tray.watchdog.value > 32760) tray.watchdog.value = 0;\n// last message in burst\n    newData = true;\n}\nif (!newData) return null;\n// End custom\n\nlet newMsg = {topic:trayName, payload:tray};\nreturn  [newMsg,newMsg];\n",
         "outputs": 2,
         "noerr": 0,
         "initialize": "",
@@ -1397,7 +1423,7 @@
         "type": "function",
         "z": "d2a24d5ab7c967e5",
         "name": "Publish tray",
-        "func": "let tray = msg.payload;\nlet newMsg = \n{\n    topic: flow.get('trayProps').box + '/' + tray.type + '/' + tray.name + '/reading',\n    payload: JSON.stringify(tray)\n};\nreturn  newMsg;  \n",
+        "func": "let tray = msg.payload;\nlet newMsg = \n{\n    topic: flow.get('trayProps').box + '/tray/' + tray.type + '/' + tray.name + '/reading',\n    payload: JSON.stringify(tray)\n};\nreturn  newMsg;  \n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1435,7 +1461,7 @@
         "type": "function",
         "z": "d2a24d5ab7c967e5",
         "name": "Archive tray",
-        "func": "let tray = msg.payload;\nlet newMsg = \n{\n    topic: flow.get('trayProps').box + '/' + tray.type + '/' + tray.name + '/archive',\n    payload: JSON.stringify(tray)\n};\nreturn  newMsg;  \n",
+        "func": "let tray = msg.payload;\nlet newMsg = \n{\n    topic: flow.get('trayProps').box + '/tray/' + tray.type + '/' + tray.name + '/archive',\n    payload: JSON.stringify(tray)\n};\nreturn  newMsg;  \n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1496,7 +1522,7 @@
         "type": "function",
         "z": "d2a24d5ab7c967e5",
         "name": "Alarm Scan",
-        "func": "let tray = msg.payload;\nlet alarmFlagReading = scalarAlarmScan(tray, 'reading');\nlet alarmFlagSetting = scalarAlarmScan(tray, 'setting');\nreturn {topic: 'alarmScanCompleted', payload: tray};\n\nfunction getActionArray(tray, type, actionType)\n{\n    var actionArray = [];\n    var keys = Object.keys(tray);\n    for (var ii = 0; ii < keys.length; ++ii)\n    {\n        if (tray[keys[ii]].hasOwnProperty('type'))\n        {\n            if (tray[keys[ii]].type == type)\n            {\n                if (tray[keys[ii]].action == actionType)\n                {\n                    actionArray.push(tray[keys[ii]]);\n                }\n            }\n        }\n    }\n    return actionArray;\n}\nfunction scalarAlarmScan(tray, actionType)\n{\n    var alarmFlag = false;\n    var actionArray = getActionArray(tray, 'scalar', actionType);\n    if (actionArray.length > 0)\n    {\n        for (var ii = 0; ii < actionArray.length; ++ii)\n        {\n            let oldAlarmValue = actionArray[ii].alarm.value;\n            actionArray[ii].alarm.value = 0;\n            if (!isNaN(actionArray[ii].value))\n            {\n                if (actionArray[ii].value <= actionArray[ii].alarm.limits.low)  actionArray[ii].alarm.value = 1;\n                if (actionArray[ii].value <= actionArray[ii].alarm.limits.lolo) actionArray[ii].alarm.value = 3;\n                if (actionArray[ii].value >= actionArray[ii].alarm.limits.high) actionArray[ii].alarm.value = 2;\n                if (actionArray[ii].value >= actionArray[ii].alarm.limits.hihi) actionArray[ii].alarm.value = 4;\n                if (actionArray[ii].alarm.value != oldAlarmValue) alarmFlag = true;\n            }\n        }\n    }\n    return alarmFlag;\n}\n",
+        "func": "let tray = msg.payload;\nlet alarmFlagReading = scalarAlarmScan(tray, 'reading');\nlet alarmFlagSetting = scalarAlarmScan(tray, 'setting');\nlet newMsg = null;\nswitch( tray.trayControl.value)\n{\n    case 0:\n        newMsg = {topic: 'alarmScanCompleted', payload: tray};\n        break;\n    case -1:\n        tray.trayControl.value = 1;\n        newMsg = {topic: 'alarmScanCompleted', payload: tray};\n        break;\n    default:\n        break;\n}\nreturn newMsg;\n\nfunction getActionArray(tray, type, actionType)\n{\n    var actionArray = [];\n    var keys = Object.keys(tray);\n    for (var ii = 0; ii < keys.length; ++ii)\n    {\n        if (tray[keys[ii]].hasOwnProperty('type'))\n        {\n            if (tray[keys[ii]].type == type)\n            {\n                if (tray[keys[ii]].action == actionType)\n                {\n                    actionArray.push(tray[keys[ii]]);\n                }\n            }\n        }\n    }\n    return actionArray;\n}\nfunction scalarAlarmScan(tray, actionType)\n{\n    var alarmFlag = false;\n    var actionArray = getActionArray(tray, 'scalar', actionType);\n    if (actionArray.length > 0)\n    {\n        for (var ii = 0; ii < actionArray.length; ++ii)\n        {\n            let oldAlarmValue = actionArray[ii].alarm.value;\n            actionArray[ii].alarm.value = 0;\n            if (!isNaN(actionArray[ii].value))\n            {\n                if (actionArray[ii].value <= actionArray[ii].alarm.limits.low)  actionArray[ii].alarm.value = 1;\n                if (actionArray[ii].value <= actionArray[ii].alarm.limits.lolo) actionArray[ii].alarm.value = 3;\n                if (actionArray[ii].value >= actionArray[ii].alarm.limits.high) actionArray[ii].alarm.value = 2;\n                if (actionArray[ii].value >= actionArray[ii].alarm.limits.hihi) actionArray[ii].alarm.value = 4;\n                if (actionArray[ii].alarm.value != oldAlarmValue) alarmFlag = true;\n            }\n        }\n    }\n    return alarmFlag;\n}\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "// Code added here will be run once\n// whenever the node is started.\ncontext.set('lastAlarm', -1);",
@@ -1558,7 +1584,7 @@
             "d01e0614c84a1d3d"
         ],
         "x": 1025,
-        "y": 340,
+        "y": 320,
         "wires": []
     },
     {
@@ -1579,8 +1605,8 @@
         "type": "function",
         "z": "d2a24d5ab7c967e5",
         "name": "Create Setting",
-        "func": "let tray = msg.tray;\n// Start Custom\nlet publishTopic = \"shellies\" + \"/\" + tray.type + \"/\" + tray.name + \"/relay/0/command\";\n// End Custom\nlet blinkyBusSettingMsg = \n{\n    topic : publishTopic, \n    payload : {} \n}\nlet blinkyBusMessage = false;\nswitch(msg.payload.cube)\n{\n// Start Custom\n    case 'setRelay':\n        if (msg.payload.value == 0)  blinkyBusSettingMsg.payload = \"off\"\n        if (msg.payload.value == 1)  blinkyBusSettingMsg.payload = \"on\"\n        tray[msg.payload.cube].value = msg.payload.value;\n        blinkyBusMessage = true;\n        break;\n    case 'opState':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n   case 'startScheduleTime':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'stopScheduleTime':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'maxRate':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'alias':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'priceArea':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'timeZone':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n     default:\n        break;\n// End Custom\n}\nlet msgArray = [null,null];\nif (blinkyBusMessage)\n{\n    msgArray = [blinkyBusSettingMsg, {topic:'settingDone', payload:tray}];\n    \n}\nelse\n{\n    msgArray = [null,{topic:'settingDone', payload:tray}];\n}\nreturn msgArray;",
-        "outputs": 2,
+        "func": "let tray = msg.tray;\n// Start Custom\nlet publishTopic = env.get(\"SHELLYMQTTLEAD\") + '/' + tray.type + \"/\" + tray.name + \"/relay/0/command\";\n// End Custom\nlet blinkyBusSettingMsg = \n{\n    topic : publishTopic, \n    payload : {} \n}\nlet blinkyBusMessage = false;\nlet trayControlMessage = null;\nlet trayProps  = flow.get('trayProps');\n\nswitch(msg.payload.cube)\n{\n// Start Custom\n    case 'setRelay':\n        if (msg.payload.value == 0)  blinkyBusSettingMsg.payload = \"off\"\n        if (msg.payload.value == 1)  blinkyBusSettingMsg.payload = \"on\"\n        tray[msg.payload.cube].value = msg.payload.value;\n        blinkyBusMessage = true;\n        break;\n    case 'opState':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n   case 'startScheduleTime':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'stopScheduleTime':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'maxRate':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'alias':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'priceArea':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'timeZone':\n        tray[msg.payload.cube].value  = msg.payload.value;\n        blinkyBusMessage = false;\n        break;\n    case 'trayControl':\n        switch(msg.payload.value)\n        {\n            case 0:\n                tray.trayControl.value = 0;\n                break;\n            case 1:\n                tray.trayControl.value = -1;\n                break;\n            case 2:\n                if (tray.trayControl.value > 0)\n                {\n                    tray.trayControl.value = 2;\n                    trayControlMessage =\n                    {\n                        topic: trayProps.box + '/tray/' + tray.type + '/' + tray.name + '/echo',\n                        payload: JSON.stringify({ topic: trayProps.box + '/tray/' + tray.type + '/' + tray.name + '/setting/echo' })\n                    };\n                }\n                break;\n            default:\n                tray.trayControl.value = 0;\n                break;\n        }\n     default:\n        break;\n// End Custom\n}\nlet msgArray = [null,null];\nif (blinkyBusMessage)\n{\n    msgArray = [blinkyBusSettingMsg, {topic:'settingDone', payload:tray},null];\n    \n}\nelse\n{\n    msgArray = [null,{topic:'settingDone', payload:tray},trayControlMessage];\n}\nreturn msgArray;",
+        "outputs": 3,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
@@ -1593,6 +1619,9 @@
             ],
             [
                 "28c4cf3d1c33905a"
+            ],
+            [
+                "55b54f13100eb833"
             ]
         ]
     },
@@ -1607,8 +1636,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 870,
-        "y": 460,
+        "x": 880,
+        "y": 480,
         "wires": [
             [
                 "14a91c438626c08e"
@@ -1626,8 +1655,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 850,
-        "y": 400,
+        "x": 860,
+        "y": 420,
         "wires": [
             [
                 "414176878f0dea95"
@@ -1643,8 +1672,8 @@
         "links": [
             "44aa96ca45a67f72"
         ],
-        "x": 1025,
-        "y": 400,
+        "x": 1035,
+        "y": 420,
         "wires": []
     },
     {
@@ -1656,8 +1685,8 @@
         "links": [
             "44aa96ca45a67f72"
         ],
-        "x": 1025,
-        "y": 460,
+        "x": 1035,
+        "y": 480,
         "wires": []
     },
     {
@@ -1672,7 +1701,7 @@
         "finalize": "",
         "libs": [],
         "x": 870,
-        "y": 580,
+        "y": 600,
         "wires": [
             [
                 "06b9973af3dcafa1"
@@ -1688,8 +1717,8 @@
         "links": [
             "f2b4b911f74af0d8"
         ],
-        "x": 1025,
-        "y": 580,
+        "x": 1035,
+        "y": 600,
         "wires": []
     },
     {
@@ -1713,7 +1742,7 @@
         "type": "function",
         "z": "d2a24d5ab7c967e5",
         "name": "Gizmo MQTT Reading topic",
-        "func": "let trayProps = flow.get('trayProps');\nlet subscribeTopic = \"shellies/\" + trayProps.type + \"/+/#\";  //Custom\nreturn {action:\"subscribe\",topic:subscribeTopic};",
+        "func": "let trayProps = flow.get('trayProps');\nlet subscribeTopic = env.get(\"SHELLYMQTTLEAD\") + '/' + trayProps.type + \"/+/#\";  //Custom\nreturn {action:\"subscribe\",topic:subscribeTopic};",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1783,7 +1812,7 @@
         "type": "function",
         "z": "d2a24d5ab7c967e5",
         "name": "Blinky MQTT Reading topic",
-        "func": "let trayProps = flow.get('trayProps');\nlet subscribeTopic = trayProps.box + \"/\" + trayProps.type + \"/+/setting/#\";  //Custom\nreturn {action:\"subscribe\",topic:subscribeTopic};",
+        "func": "let trayProps = flow.get('trayProps');\nlet subscribeTopic = trayProps.box + \"/tray/\" + trayProps.type + \"/+/setting/#\";  //Custom\nreturn {action:\"subscribe\",topic:subscribeTopic};",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1812,5 +1841,18 @@
                 "08b57e2067c271c7"
             ]
         ]
+    },
+    {
+        "id": "55b54f13100eb833",
+        "type": "link out",
+        "z": "d2a24d5ab7c967e5",
+        "name": "reload tray out",
+        "mode": "link",
+        "links": [
+            "fdc7523a710f472f"
+        ],
+        "x": 1025,
+        "y": 360,
+        "wires": []
     }
 ]
