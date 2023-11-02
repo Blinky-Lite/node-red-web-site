@@ -335,10 +335,10 @@ module.exports = {
         tours: false,
 
         page: {
-            title: "blinky-shelly-trays"
+            title: "blinky-json-echo-trays"
         },
         header: {
-            title: "blinky-shelly-trays"
+            title: "blinky-json-echo-trays"
         },
 
         palette: {
