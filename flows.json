@@ -130,33 +130,6 @@
         "sessionExpiry": ""
     },
     {
-        "id": "a4b7c56322036cdf",
-        "type": "mqtt-broker",
-        "name": "Test Hub Broker",
-        "broker": "hip-lifeguard.cloudmqtt.com",
-        "port": "1883",
-        "clientid": "booger",
-        "autoConnect": true,
-        "usetls": false,
-        "protocolVersion": "4",
-        "keepalive": "60",
-        "cleansession": true,
-        "birthTopic": "",
-        "birthQos": "0",
-        "birthPayload": "",
-        "birthMsg": {},
-        "closeTopic": "",
-        "closeQos": "0",
-        "closePayload": "",
-        "closeMsg": {},
-        "willTopic": "",
-        "willQos": "0",
-        "willPayload": "",
-        "willMsg": {},
-        "userProps": "",
-        "sessionExpiry": ""
-    },
-    {
         "id": "49c7b59e.00e86c",
         "type": "inject",
         "z": "35ebad916f0a27ed",
@@ -473,7 +446,7 @@
         "type": "function",
         "z": "35ebad916f0a27ed",
         "name": "Create Readings",
-        "func": "let trayProps = flow.get('trayProps');\nlet topicSplit = msg.topic.split('/');\nif (topicSplit[2] != trayProps.type) return null;\nlet trayName = topicSplit[3];\nlet trays = flow.get('trays');\nlet tray = null;\nlet trayIndex = -1;\nfor (let ii = 0; ii < trays.length; ++ii)\n{\n    if (trays[ii].name == trayName)\n    {\n        tray = trays[ii];\n        trayIndex = ii;\n    }\n}\nif (tray ==  null) return null;\nlet newData = false;\ntray.timeStamp = new Date().getTime();\n\n// Start Custom \nnewData = true;\nfor (let cube in msg.payload)\n{\n    tray[cube].value = msg.payload[cube];\n}\ntray.watchdog.value = tray.watchdog.value + 1;\nif (tray.watchdog.value > 32764) tray.watchdog.value = 0;\nif (!newData) return null;\n// End custom\n\nlet newMsg = {topic:trayName, payload:tray};\nlet archiveMsg = null;\nlet archiveTimes = flow.get('archiveTimes');\nif ((tray.timeStamp - archiveTimes[trayIndex]) > tray.arcPeriod)\n{\n    archiveTimes[trayIndex] = tray.timeStamp;\n    archiveMsg = newMsg;\n}\nreturn  [newMsg,archiveMsg];\n",
+        "func": "let trayProps = flow.get('trayProps');\nlet topicSplit = msg.topic.split('/');\nif (topicSplit[2] != trayProps.type) return null;\nlet trayName = topicSplit[3];\nlet trays = flow.get('trays');\nlet tray = null;\nlet trayIndex = -1;\nfor (let ii = 0; ii < trays.length; ++ii)\n{\n    if (trays[ii].name == trayName)\n    {\n        tray = trays[ii];\n        trayIndex = ii;\n    }\n}\nif (tray ==  null) return null;\nlet newData = false;\ntray.timeStamp = new Date().getTime();\n\n// Start Custom \nnewData = true;\nfor (let cube in msg.payload)\n{\n    if (cube in tray)\n    {\n        tray[cube].value = msg.payload[cube];\n    }\n}\ntray.watchdog.value = tray.watchdog.value + 1;\nif (tray.watchdog.value > 32764) tray.watchdog.value = 0;\nif (!newData) return null;\n// End custom\n\nlet newMsg = {topic:trayName, payload:tray};\nlet archiveMsg = null;\nlet archiveTimes = flow.get('archiveTimes');\nif ((tray.timeStamp - archiveTimes[trayIndex]) > tray.arcPeriod)\n{\n    archiveTimes[trayIndex] = tray.timeStamp;\n    archiveMsg = newMsg;\n}\nreturn  [newMsg,archiveMsg];\n",
         "outputs": 2,
         "noerr": 0,
         "initialize": "",
@@ -483,8 +456,7 @@
         "y": 660,
         "wires": [
             [
-                "cffe9c2a52b1e43e",
-                "dc6f9965c70c665b"
+                "cffe9c2a52b1e43e"
             ],
             [
                 "0dba75772bcd5ea0"
@@ -961,69 +933,6 @@
         ],
         "x": 1025,
         "y": 360,
-        "wires": []
-    },
-    {
-        "id": "a19f6b4e7812075d",
-        "type": "inject",
-        "z": "35ebad916f0a27ed",
-        "name": "TestData",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "ockhams-razorblade-01/blinky-hub/razor/01/reading",
-        "payload": "{\"Event\":1,\"Amount\":4,\"Concentration\":3,\"FalseTriggers\":7,\"RedTotal\":5,\"BlueTotal\":6,\"RedTargetPPT\":7,\"BlueTargetPPT\":8}",
-        "payloadType": "json",
-        "x": 280,
-        "y": 840,
-        "wires": [
-            [
-                "5544b7a6ae380181"
-            ]
-        ]
-    },
-    {
-        "id": "dc6f9965c70c665b",
-        "type": "debug",
-        "z": "35ebad916f0a27ed",
-        "name": "debug 1",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 680,
-        "y": 720,
-        "wires": []
-    },
-    {
-        "id": "5544b7a6ae380181",
-        "type": "mqtt out",
-        "z": "35ebad916f0a27ed",
-        "name": "",
-        "topic": "",
-        "qos": "0",
-        "retain": "",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "a4b7c56322036cdf",
-        "x": 510,
-        "y": 840,
         "wires": []
     }
 ]

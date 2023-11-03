@@ -2,9 +2,5 @@
     "84d80994.260508": {
         "user": "$(MQTTUSERNAME)",
         "password": "$(MQTTPASSWORD)"
-    },
-    "a4b7c56322036cdf": {
-        "user": "ockhams-se-razor-01",
-        "password": "andLetThereBeLite!"
     }
 }
