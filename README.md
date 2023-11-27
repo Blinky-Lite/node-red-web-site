@@ -1,1 +1,1 @@
-# empty-node-red
+# node-red-static-web-server
