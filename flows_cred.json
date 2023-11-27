@@ -1,6 +1,1 @@
-{
-    "84d80994.260508": {
-        "user": "$(MQTTUSERNAME)",
-        "password": "$(MQTTPASSWORD)"
-    }
-}
+{}
