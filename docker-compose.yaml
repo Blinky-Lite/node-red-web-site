@@ -1,0 +1,19 @@
+version: "3.4"
+  
+services:
+  web:
+    image: blinkylite/empty-node-red:amd64
+    container_name: empty-node-red-01
+    ports:
+      - "60427:60427"
+    volumes:
+      - ./flows.json:/data/flows.json
+      - ./flows_cred.json:/data/flows_cred.json
+    environment:
+      - NODEREDPORT=60427
+      - ENABLE_NODERED_EDITOR=1
+      - HTMLSTATICDIR=/data/html-static/
+networks:
+  default:
+    name: tunnel
+    external: true

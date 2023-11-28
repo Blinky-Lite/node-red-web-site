@@ -335,10 +335,10 @@ module.exports = {
         tours: false,
 
         page: {
-            title: "empty-node-red"
+            title: process.env.NODE_RED_TITLE
         },
         header: {
-            title: "empty-node-red"
+            title: process.env.NODE_RED_TITLE
         },
 
         palette: {
