@@ -5,3 +5,4 @@ ENABLE_NODERED_EDITOR=1
 GIT_REPO_URL=git@github.com:org/repos.git
 GIT_BRANCH=master
 GIT_STATIC_CONTENT=_site
+RSA_DIR=ssh

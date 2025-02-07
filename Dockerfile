@@ -6,7 +6,9 @@ USER 0
 RUN mkdir -p /usr/src/node-red/ssh
 RUN chown node-red /usr/src/node-red/ssh
 RUN chgrp node-red /usr/src/node-red/ssh
-RUN mkdir -p /data/html-static/
+RUN mkdir -p /data/html-static
+RUN chown node-red /data/html-static
+RUN chgrp node-red /data/html-static
 USER node-red 
 
 WORKDIR /usr/src/node-red
