@@ -3,7 +3,9 @@ logs
 *.log
 npm-debug.log*
 
-ssh/*
+ssh/id_rsa
+html-static/*
+!html-static/tmp
 # Dependency directories
 node_modules
 
