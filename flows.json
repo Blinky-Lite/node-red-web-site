@@ -123,8 +123,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 290,
-        "y": 400,
+        "x": 170,
+        "y": 100,
         "wires": [
             [
                 "a53a8b8519514569"
@@ -143,8 +143,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 490,
-        "y": 400,
+        "x": 370,
+        "y": 100,
         "wires": [
             [
                 "3451e3fe04828fd9"
@@ -163,8 +163,8 @@
         "winHide": false,
         "oldrc": false,
         "name": "",
-        "x": 670,
-        "y": 400,
+        "x": 550,
+        "y": 100,
         "wires": [
             [],
             [],
@@ -180,8 +180,8 @@
         "method": "post",
         "upload": false,
         "swaggerDoc": "",
-        "x": 260,
-        "y": 580,
+        "x": 140,
+        "y": 280,
         "wires": [
             [
                 "93deee5804d587a6"
@@ -196,8 +196,8 @@
         "property": "payload",
         "action": "obj",
         "pretty": false,
-        "x": 390,
-        "y": 580,
+        "x": 270,
+        "y": 280,
         "wires": [
             [
                 "16c77e0a7917bf97",
@@ -216,8 +216,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 530,
-        "y": 580,
+        "x": 410,
+        "y": 280,
         "wires": [
             [
                 "e533ccdfd83bb813"
@@ -236,8 +236,8 @@
         "winHide": false,
         "oldrc": false,
         "name": "",
-        "x": 850,
-        "y": 580,
+        "x": 730,
+        "y": 280,
         "wires": [
             [],
             [],
@@ -265,8 +265,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 540,
-        "y": 660,
+        "x": 420,
+        "y": 360,
         "wires": [
             [
                 "e533ccdfd83bb813"
@@ -285,8 +285,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 680,
-        "y": 580,
+        "x": 560,
+        "y": 280,
         "wires": [
             [
                 "96993c80c018f738"
@@ -305,76 +305,8 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 540,
-        "y": 500,
+        "x": 420,
+        "y": 200,
         "wires": []
-    },
-    {
-        "id": "02e29d7fe8896301",
-        "type": "http in",
-        "z": "7cbe116050851432",
-        "name": "/",
-        "url": "/",
-        "method": "get",
-        "upload": false,
-        "swaggerDoc": "",
-        "x": 170,
-        "y": 80,
-        "wires": [
-            [
-                "cbd7455e535c53aa"
-            ]
-        ]
-    },
-    {
-        "id": "60a53f807d378b5f",
-        "type": "http response",
-        "z": "7cbe116050851432",
-        "name": "",
-        "statusCode": "",
-        "headers": {},
-        "x": 830,
-        "y": 80,
-        "wires": []
-    },
-    {
-        "id": "cbd7455e535c53aa",
-        "type": "function",
-        "z": "7cbe116050851432",
-        "name": "Check for custom launch",
-        "func": "msg[\"filename\"] = env.get(\"HTMLSTATICDIR\") + \"/index.html\";\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 350,
-        "y": 80,
-        "wires": [
-            [
-                "879eb0494bb37a3d"
-            ]
-        ]
-    },
-    {
-        "id": "879eb0494bb37a3d",
-        "type": "file in",
-        "z": "7cbe116050851432",
-        "name": "Custom launch index.html",
-        "filename": "filename",
-        "filenameType": "msg",
-        "format": "utf8",
-        "chunk": false,
-        "sendError": false,
-        "encoding": "none",
-        "allProps": false,
-        "x": 610,
-        "y": 80,
-        "wires": [
-            [
-                "60a53f807d378b5f"
-            ]
-        ]
     }
 ]
