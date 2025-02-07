@@ -1,4 +1,7 @@
 NODEREDPORT=60427
 HTMLSTATICDIR=html-static/
-NODE_RED_TITLE=node-red
+NODE_RED_TITLE=node-red-web
 ENABLE_NODERED_EDITOR=1
+GIT_REPO_URL=git@github.com:org/repos.git
+GIT_BRANCH=master
+GIT_STATIC_CONTENT=_site

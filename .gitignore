@@ -3,7 +3,7 @@ logs
 *.log
 npm-debug.log*
 
-
+ssh/*
 # Dependency directories
 node_modules
 
@@ -22,3 +22,5 @@ node_modules
 .config.users.json
 .config.users.json.backup
 .flows_cred.json.backup
+.config.runtime.json
+

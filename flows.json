@@ -101,5 +101,280 @@
                 "py": 0
             }
         }
+    },
+    {
+        "id": "ee685ad9ef4a5d44",
+        "type": "inject",
+        "z": "7cbe116050851432",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 290,
+        "y": 400,
+        "wires": [
+            [
+                "a53a8b8519514569"
+            ]
+        ]
+    },
+    {
+        "id": "a53a8b8519514569",
+        "type": "function",
+        "z": "7cbe116050851432",
+        "name": "Get env variables",
+        "func": "if (env.get(\"GIT_REPO_URL\") == \"NONE\") return null;\nif (env.get(\"GIT_STATIC_CONTENT\") == \"NONE\") return null;\nif (env.get(\"GIT_BRANCH\") == \"NONE\") return null;\nlet gitCommand = 'git';\nif (env.get(\"GIT_REPO_URL\").indexOf('https') < 0)\n{\n    gitCommand = 'GIT_SSH_COMMAND=\"ssh -i ssh/id_rsa\" git'\n}\nmsg.payload = 'cd ' + env.get(\"HTMLSTATICDIR\");\nmsg.payload = msg.payload + '; rm -rf .git; rm -rf _site '; \nmsg.payload = msg.payload + '; git init; git remote add -f web '; \nmsg.payload = msg.payload + env.get(\"GIT_REPO_URL\");\nmsg.payload = msg.payload + '; git config core.sparsecheckout true; echo ';\nmsg.payload = msg.payload + env.get(\"GIT_STATIC_CONTENT\");\nmsg.payload = msg.payload + '/ >> .git/info/sparse-checkout; ' + gitCommand + ' pull web ';\nmsg.payload = msg.payload + env.get(\"GIT_BRANCH\")\nmsg.payload = msg.payload + '; cp -R ' + env.get(\"GIT_STATIC_CONTENT\") + '/* .';\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 400,
+        "wires": [
+            [
+                "3451e3fe04828fd9"
+            ]
+        ]
+    },
+    {
+        "id": "3451e3fe04828fd9",
+        "type": "exec",
+        "z": "7cbe116050851432",
+        "command": "",
+        "addpay": "payload",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "",
+        "x": 670,
+        "y": 400,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "0a67c5df72bfaa91",
+        "type": "http in",
+        "z": "7cbe116050851432",
+        "name": "/gitUpdate",
+        "url": "/gitUpdate",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 260,
+        "y": 580,
+        "wires": [
+            [
+                "93deee5804d587a6"
+            ]
+        ]
+    },
+    {
+        "id": "93deee5804d587a6",
+        "type": "json",
+        "z": "7cbe116050851432",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 390,
+        "y": 580,
+        "wires": [
+            [
+                "16c77e0a7917bf97",
+                "e777eb11f1ca747a"
+            ]
+        ]
+    },
+    {
+        "id": "16c77e0a7917bf97",
+        "type": "function",
+        "z": "7cbe116050851432",
+        "name": "check for url",
+        "func": "if (env.get(\"GIT_REPO_URL\") == \"NONE\") return null;\nif (env.get(\"GIT_STATIC_CONTENT\") == \"NONE\") return null;\nif (env.get(\"GIT_BRANCH\") == \"NONE\") return null;\nif (!msg.payload.repository.hasOwnProperty('clone_url')) return null;\nif (msg.payload.repository.clone_url != env.get(\"GIT_REPO_URL\")) return null;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 580,
+        "wires": [
+            [
+                "e533ccdfd83bb813"
+            ]
+        ]
+    },
+    {
+        "id": "96993c80c018f738",
+        "type": "exec",
+        "z": "7cbe116050851432",
+        "command": "",
+        "addpay": "payload",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "",
+        "x": 850,
+        "y": 580,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "628c6b3a522b91a5",
+        "type": "inject",
+        "z": "7cbe116050851432",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 540,
+        "y": 660,
+        "wires": [
+            [
+                "e533ccdfd83bb813"
+            ]
+        ]
+    },
+    {
+        "id": "e533ccdfd83bb813",
+        "type": "function",
+        "z": "7cbe116050851432",
+        "name": "setup pull",
+        "func": "let gitCommand = 'git';\nif (env.get(\"GIT_REPO_URL\").indexOf('https') < 0)\n{\n    gitCommand = 'GIT_SSH_COMMAND=\"ssh -i ssh/id_rsa\" git'\n}\nlet newMsg = {topic:\"gitpull\", payload:\"\"};\nnewMsg.payload = 'cd ' + env.get(\"HTMLSTATICDIR\");\nnewMsg.payload = newMsg.payload + '; git config core.sparsecheckout true; echo ';\nnewMsg.payload = newMsg.payload + env.get(\"GIT_STATIC_CONTENT\");\nnewMsg.payload = newMsg.payload + '/ >> .git/info/sparse-checkout; ' + gitCommand + ' pull web ';\nnewMsg.payload = newMsg.payload + env.get(\"GIT_BRANCH\")\nnewMsg.payload = newMsg.payload + '; cp -R ' + env.get(\"GIT_STATIC_CONTENT\") + '/* .';\nreturn newMsg;\n\n\n\n//newMsg.payload = newMsg.payload + '; git pull web ';\n//newMsg.payload = newMsg.payload + env.get(\"GIT_BRANCH\")\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 680,
+        "y": 580,
+        "wires": [
+            [
+                "96993c80c018f738"
+            ]
+        ]
+    },
+    {
+        "id": "e777eb11f1ca747a",
+        "type": "debug",
+        "z": "7cbe116050851432",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 540,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "02e29d7fe8896301",
+        "type": "http in",
+        "z": "7cbe116050851432",
+        "name": "/",
+        "url": "/",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 170,
+        "y": 80,
+        "wires": [
+            [
+                "cbd7455e535c53aa"
+            ]
+        ]
+    },
+    {
+        "id": "60a53f807d378b5f",
+        "type": "http response",
+        "z": "7cbe116050851432",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 830,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "cbd7455e535c53aa",
+        "type": "function",
+        "z": "7cbe116050851432",
+        "name": "Check for custom launch",
+        "func": "msg[\"filename\"] = env.get(\"HTMLSTATICDIR\") + \"/index.html\";\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 80,
+        "wires": [
+            [
+                "879eb0494bb37a3d"
+            ]
+        ]
+    },
+    {
+        "id": "879eb0494bb37a3d",
+        "type": "file in",
+        "z": "7cbe116050851432",
+        "name": "Custom launch index.html",
+        "filename": "filename",
+        "filenameType": "msg",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 610,
+        "y": 80,
+        "wires": [
+            [
+                "60a53f807d378b5f"
+            ]
+        ]
     }
 ]

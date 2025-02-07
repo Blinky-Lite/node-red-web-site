@@ -1,20 +1,20 @@
-version: "3.4"
+version: "3.7"
   
 services:
   web:
-    image: blinkylite/empty-node-red:amd64
-    container_name: empty-node-red-01
+    image: blinkylite/node-red-web:amd64
+    container_name: node-red-web
     ports:
       - "60427:60427"
     volumes:
-      - empty-node-red-01:/data
+      - data:/data
     environment:
       - NODEREDPORT=60427
       - ENABLE_NODERED_EDITOR=1
-      - NODE_RED_TITLE=empty-node-red-01
+      - NODE_RED_TITLE=node-red-web
       - HTMLSTATICDIR=/data/html-static/
 volumes:
-  empty-node-red-01:
+  data:
     driver: local  
 networks:
   default:
