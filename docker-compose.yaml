@@ -1,22 +1,25 @@
-version: "3.7"
-  
 services:
   web:
-    image: blinkylite/node-red-web:amd64
-    container_name: node-red-web
+    image: blinkylite/node-red-web-site:${DOCKER_TAG}
+    container_name: node-red-web-site
     ports:
-      - "60427:60427"
+      - "60499:60499"
     volumes:
-      - data:/data
+      - ssh:/usr/src/node-red/ssh
     environment:
-      - NODEREDPORT=60427
-      - ENABLE_NODERED_EDITOR=1
-      - NODE_RED_TITLE=node-red-web
-      - HTMLSTATICDIR=/data/html-static/
+      - NODEREDPORT=60499
+      - ENABLE_NODERED_EDITOR=${ENABLE_NODERED_EDITOR}
+      - NODE_RED_TITLE=node-red-web-site
+      - HTMLSTATICDIR=/data/html-static
+      - GIT_REPO_URL=${GIT_REPO_URL}
+      - GIT_BRANCH=${GIT_BRANCH}
+      - GIT_STATIC_CONTENT=${GIT_STATIC_CONTENT}
+      - RSA_DIR=/usr/src/node-red/ssh
 volumes:
-  data:
+  ssh:
     driver: local  
 networks:
   default:
     name: tunnel
     external: true
+
